@@ -4,6 +4,8 @@
 
 **Try it live:** https://kelseybivens.shinyapps.io/FunctionExplorer/
 
+**Full report:** [Function Explorer: Testing Function Properties Analytically and Numerically](REPORT.md)
+
 *(The app may take a few seconds to wake up on the first visit.)*
 
 ![Function Explorer showing f(x) = x^2 failing the horizontal line test](x2_all_reals.png)
@@ -51,6 +53,7 @@ The app turns each definition into something a computer can test:
 
 | File | Description |
 |---|---|
+| `REPORT.md` | The full modeling report: formulation, proofs, results, and limitations |
 | `app.R` | The Function Explorer app (current version) |
 | `FunctionExample.R` | The original version: a prompt, a text box, and an echo of the user's answer |
 

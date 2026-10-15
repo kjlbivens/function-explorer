@@ -4,7 +4,7 @@
 
 **Try it live:** https://kelseybivens.shinyapps.io/FunctionExplorer/
 
-**Full report:** [Function Explorer: Testing Function Properties Analytically and Numerically](REPORT.md)
+**Full report:** [Function Explorer: Checking Function Properties with Proofs and an App](REPORT.md)
 
 *(The app may take a few seconds to wake up on the first visit.)*
 

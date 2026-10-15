@@ -1,22 +1,22 @@
-# Function Explorer: Testing Function Properties Analytically and Numerically
+# Function Explorer: Checking Function Properties with Proofs and an App
 
 **Kelsey Bivens** · October 15, 2026
 
-A web app that samples a function at about 4,000 points correctly classified 21 test cases as injective, surjective, bijective, or continuous, matching the formal proofs every time. It can suggest an answer quickly, but only a proof can confirm one.
+For this project, I turned a simple Shiny app into a tool that graphs a function and checks whether it is injective, surjective, bijective, and continuous. Its answers matched the proofs in all 21 functions I tested, but only a proof can actually confirm an answer.
 
 **Live app:** https://kelseybivens.shinyapps.io/FunctionExplorer/
 
 ## 1. Problem statement
 
-The question this project answers: **can a computer reliably decide whether a function is injective, surjective, bijective, or continuous, and can that tool help students understand the definitions instead of memorizing them?**
+The question I wanted to answer was: **can a computer reliably check whether a function is injective, surjective, bijective, or continuous, and can that help students actually understand these ideas instead of just memorizing them?**
 
-Students usually meet these properties through formal proofs and a few hand-drawn graphs. A student can often recite "different inputs give different outputs" without being able to explain why a parabola fails that test, or how changing the domain changes the answer. Each property depends on three things at once, the formula, the domain, and the codomain, and that is hard to see on paper.
+Most of us learn these properties through proofs and a few graphs drawn by hand. It is easy to memorize "different inputs give different outputs" without really understanding why a parabola fails that test, or why changing the domain can change the answer. Each property depends on three things at once, the formula, the domain, and the codomain, and that is hard to see on paper.
 
-This report expands Project 2 from this course. In Question 1, I built an R Shiny app that asked "Give an example of a function" and displayed the answer back. Questions 2 to 4 asked for proofs about f(x) = 4x + 2, parabolas, and continuity. The expanded app, **Function Explorer**, connects those two halves: it graphs the function the user types and tests all four properties on a domain and codomain the user chooses, explaining each result in plain language.
+This report builds on Project 2 from this course. For Question 1, I made an R Shiny app that asked "Give an example of a function" and showed the answer back. Questions 2 to 4 asked for proofs about f(x) = 4x + 2, parabolas, and continuity. For the capstone, I connected those two parts: **Function Explorer** graphs whatever function the user types, checks all four properties on a domain and codomain the user picks, and explains each answer in plain words.
 
 ## 2. Mathematical formulation
 
-Let f be a function from a domain A to a codomain B, both subsets of the real numbers. The modeling step is rewriting each definition as something a computer can check.
+Let f be a function from a domain A to a codomain B, where both are sets of real numbers. The modeling part of this project was taking each definition and turning it into something a computer can actually check.
 
 **Injective (one-to-one).** Different inputs always give different outputs:
 
@@ -24,17 +24,17 @@ Let f be a function from a domain A to a codomain B, both subsets of the real nu
 f(a_1) = f(a_2) \implies a_1 = a_2 \quad \text{for all } a_1, a_2 \in A
 ```
 
-Testable version: no horizontal line y = c crosses the graph at two different x-values (the horizontal line test).
+How the app checks it: if any horizontal line crosses the graph at two different x-values, the function is not injective. This is the horizontal line test.
 
-**Surjective (onto).** Every value in the codomain is reached:
+**Surjective (onto).** Every value in the codomain gets hit by some input:
 
 ```math
 \text{for every } b \in B \text{ there is an } a \in A \text{ with } f(a) = b
 ```
 
-Testable version: the estimated range f(A) covers all of B.
+How the app checks it: it estimates the range and checks whether the range covers the whole codomain.
 
-**Bijective.** Both of the above. A function has an inverse exactly when it is bijective.
+**Bijective.** Both injective and surjective. A function has an inverse only when it is bijective.
 
 **Continuous.** f is continuous at a point c in its domain when
 
@@ -42,13 +42,13 @@ Testable version: the estimated range f(A) covers all of B.
 \lim_{x \to c} f(x) = f(c)
 ```
 
-In plain words: you can get f(x) as close to f(c) as you want just by picking x close enough to c. (This is the idea behind the formal epsilon-delta definition.) Testable version: zooming in on any spot, the change in f between nearby points shrinks toward zero. At a jump or asymptote, it does not.
+In plain words: you can get f(x) as close to f(c) as you want just by picking x close enough to c. (This is the idea behind the formal epsilon-delta definition.) How the app checks it: if you zoom in on any spot of a continuous graph, the change between nearby points gets smaller and smaller. At a jump or an asymptote, it does not.
 
-**Sampling.** A computer cannot check infinitely many points, so the app replaces the domain with a finite grid of about 4,000 points where the graph is drawn, plus sparser points farther out, and works with the values of f at those points.
+**Sampling.** A computer cannot check every real number, so the app checks about 4,000 points across the part of the graph you can see, plus some points farther out.
 
 ## 3. Solution approach
 
-The project uses two approaches side by side: proofs, which give certainty, and a numerical app, which gives speed and a picture.
+I used two approaches side by side: proofs, which give certainty, and the app, which is fast and gives a picture.
 
 ### 3.1 Analytical: the proofs from Project 2
 
@@ -60,20 +60,20 @@ The project uses two approaches side by side: proofs, which give certainty, and 
 
 **Continuity.** The relation x² + y² = 1 is not a function, since x = 0 gives both y = 1 and y = −1. The polynomial 4x + 2 is continuous everywhere. The floor function jumps at every integer n, where the limit from the left (n − 1) does not equal f(n) = n.
 
-### 3.2 Numerical: how the app tests a function
+### 3.2 Numerical: how the app checks a function
 
-The app is written in R with the Shiny package. When the user types a formula, it:
+I wrote the app in R using the Shiny package. When someone types a formula, the app:
 
-1. **Reads the formula safely,** accepting everyday notation such as `4x + 2` but allowing only numbers, x, pi, basic operations, and nine math functions.
-2. **Samples the function** and marks any x-values where f is undefined.
-3. **Finds breaks** by flagging unusually large steps between neighboring points and zooming in twice. If the step shrinks, f is continuous there; if not, it is a jump or an asymptote.
-4. **Estimates the range** of each unbroken piece, checking very large x-values and points near each break to see whether f heads toward infinity or levels off.
-5. **Runs the horizontal line test** on lines y = f(k) for whole numbers k, and shows the first line with two crossings in red.
-6. **Compares the range to the codomain** and names a value that is never reached.
+1. **Reads the formula,** so it understands everyday typing like `4x + 2`, but only allows numbers, x, pi, basic math, and nine functions such as sin and sqrt.
+2. **Plugs in thousands of x-values** and notes any where f is undefined, like x = 0 for 1/x.
+3. **Looks for breaks.** If two neighboring points are much farther apart than the ones around them, the app zooms in. If the gap shrinks when it zooms, the graph is connected there. If it doesn't, that is a jump or an asymptote.
+4. **Figures out the range** of each connected piece of the graph, including whether the function keeps growing toward infinity or levels off.
+5. **Runs the horizontal line test** using lines at heights like f(0), f(1), and f(−1), and highlights the first line that hits the graph twice in red.
+6. **Compares the range to the codomain** to decide surjectivity, and names a value that never gets reached.
 
 ## 4. Results
 
-The app's answer matched the analytical answer in all 21 test cases, including every function from Project 2 Questions 2 to 4. Rows marked \* are not defined on the whole chosen domain; the app flags these with a warning and checks only the x-values where f exists.
+The app's answers matched the proofs in all 21 test cases, including every function from Project 2, Questions 2 to 4. Rows marked \* are functions that are not defined everywhere in the chosen domain. The app shows a warning for these and only checks the x-values where f exists.
 
 | Function | Domain | Codomain | Injective | Surjective | Bijective | Continuous |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -103,30 +103,30 @@ Screenshots of the app are on the [repository's main page](README.md). Each chec
 
 ## 5. Interpretation
 
-**The same formula can be a bijection or not, depending on the domain and codomain.** On all real numbers, x² fails both tests. Restricting only the domain fixes injectivity, restricting only the codomain fixes surjectivity, and restricting both makes it bijective. That is the answer to Questions 2.3 and 3.3, but in the app a student watches it happen by changing one setting.
+**The same formula can be bijective or not, depending on the domain and codomain.** On all real numbers, x² fails both tests. Restricting just the domain fixes injectivity, restricting just the codomain fixes surjectivity, and restricting both makes it bijective. This is the same answer I gave for Questions 2.3 and 3.3, but in the app you can watch it happen by changing one setting.
 
-**Injective and surjective are independent.** The table has every combination: both (x³), neither (sin x), injective only (eˣ), and surjective only (tan x). Asking students to find one function for each combination makes a good classroom exercise.
+**Injective and surjective don't depend on each other.** The table has every combination: both (x³), neither (sin x), only injective (eˣ), and only surjective (tan x). Asking students to find a function for each combination would make a good classroom activity.
 
-**Easy-to-miss details show up clearly.** The app reports that eˣ never reaches 0, and that 1/x is injective but never outputs 0. It also flags √x and ln x on all real numbers, which ties back to the definition of a function: every input in the domain needs an output.
+**The app catches details that are easy to miss.** It shows that eˣ never actually reaches 0, and that 1/x is injective but never outputs 0. It also flags √x and ln x on all real numbers, which goes back to the definition of a function: every input in the domain has to have an output.
 
 ## 6. Assumptions and limitations
 
-The central limitation is that **a finite sample can suggest a property but never prove it.** Every "Yes" means "no counterexample was found among the points checked." The method assumes:
+The biggest limitation is that **checking a lot of points can suggest an answer, but it can never prove it.** When the app says "Yes," it really means "I didn't find a problem in the points I checked." The app depends on a few assumptions:
 
-- **Nothing important happens between sample points.** A spike or jump narrower than the grid spacing (about 0.005) could be missed.
-- **Far-away behavior follows the trend.** The app samples about 100 units past the graph, then checks a few huge values (up to 10³⁰⁰). A function that changes behavior in between would be misjudged.
-- **A few dozen horizontal lines are enough.** An unusual function could repeat a value only at a level the app never tries.
-- **Rounding is harmless.** Very small numbers round to zero (e⁻¹⁰⁰⁰ is stored as 0), so the app uses small tolerances.
-- **The thresholds generalize.** "Unusually large step" was tuned on familiar functions; wildly oscillating ones like sin(1/x) near 0 can fool it.
-- **Domains are intervals.** The app cannot choose all real numbers except 0, and formulas may use only nine built-in functions.
+- **Nothing important happens between the points it checks.** A very small jump or spike could fall between two points and be missed.
+- **The function keeps doing the same thing far away.** The app checks about 100 units past the graph plus a few very large x-values, so a change in between could fool it.
+- **A few dozen horizontal lines are enough.** An unusual function could repeat a value only at a height the app never checks.
+- **Computer rounding doesn't cause problems.** Computers round very tiny numbers to zero, so the app allows a small margin of error when comparing values.
+- **Its rules for spotting breaks work on most functions.** I tested them on familiar functions, but one that wiggles wildly, like sin(1/x) near 0, could confuse them.
+- **The domain has to be an interval.** You can't pick "all real numbers except 0," and formulas can only use nine built-in functions.
 
-This is why the app is a companion to proof, not a replacement: it gives a fast first answer and a concrete counterexample, and a proof makes the answer certain.
+That is why the app works best alongside proofs, not instead of them. It gives a quick first answer and a specific counterexample, and the proof is what makes the answer certain.
 
 ## 7. Conclusion
 
-Function Explorer turns four definitions into tests a computer can run, and it agreed with the formal proofs in all 21 test cases. Where the original Project 2 app only repeated the user's answer, the expanded version responds to the mathematics in it.
+Function Explorer turns four definitions into checks a computer can run, and it agreed with the proofs in all 21 test cases. The original Project 2 app only repeated back what the user typed. This version actually responds to the math in it.
 
 - **Live app:** [kelseybivens.shinyapps.io/FunctionExplorer](https://kelseybivens.shinyapps.io/FunctionExplorer/)
 - **Code (R and Shiny):** [app.R](app.R) in this repository
 
-Built in R with Shiny, with AI assistance for development and testing.
+I built the app in R with Shiny, with help from Claude AI on the coding and testing.
